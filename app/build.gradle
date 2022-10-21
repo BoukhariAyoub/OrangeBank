@@ -1,0 +1,108 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+}
+
+android {
+    namespace 'com.boukhari.orangebank'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.boukhari.orangebank"
+        minSdk 23
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.3.2"
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+    kapt {
+        correctErrorTypes true
+    }
+}
+
+dependencies {
+
+    //AndroidX : Core
+    implementation libs.androidx.core.ktx
+
+    //AndroidX : Activity
+    implementation libs.androidx.activity.compose
+
+    //AndroidX : Navigation
+    implementation libs.androidx.navigation.compose
+
+    //Lifecycle
+    implementation libs.androidx.lifecycle.viewmodel
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+
+    //Compose
+    implementation libs.compose.ui
+    implementation libs.compose.material
+    implementation libs.compose.ui.tooling.preview
+
+    //REMOTE SERVICE
+    implementation libs.retrofit.core
+    implementation libs.retrofit.converter.gson
+    implementation libs.okhttp.core
+    implementation libs.okhttp.logging.interceptor
+
+    //LOCAL DATABASE
+    implementation libs.room.runtime
+    implementation libs.room.ktx
+    // annotationProcessor libs.room.compiler
+    kapt libs.room.compiler
+
+
+    //Hilt
+    implementation libs.dagger.hilt.android
+    kapt libs.dagger.hilt.compiler
+    implementation libs.hilt.navigation.compose
+    // implementation libs.hilt.work
+//    kapt libs.hilt.compiler
+
+    //Accompanist to hide sys ui
+    implementation libs.accompanist.swiperefresh
+
+    //Compose Testing
+    androidTestImplementation libs.compose.ui.test.junit4
+    debugImplementation libs.compose.ui.tooling
+    debugImplementation libs.compose.ui.test.manifest
+
+    //Testing
+    testImplementation libs.junit.core
+    testImplementation libs.mockk
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso.core
+}
