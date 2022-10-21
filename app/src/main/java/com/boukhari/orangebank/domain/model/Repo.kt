@@ -1,4 +1,4 @@
-package com.boukhari.orangebank.domain.repository.model
+package com.boukhari.orangebank.domain.model
 
 data class Repo(
      val id: Int,
