@@ -8,13 +8,13 @@ import retrofit2.HttpException
 import java.io.IOException
 
 interface GetRepoUseCase {
-    fun getRepos(shouldRefresh: Boolean = false): Flow<Resource<List<Repo>>>
+    fun getRepos(): Flow<Resource<List<Repo>>>
     fun getRepoById(id: Int): Flow<Resource<Repo>>
 }
 
 class GetRepoUseCaseImpl(private val repository: RepoRepository) : GetRepoUseCase {
 
-    override fun getRepos(shouldRefresh: Boolean): Flow<Resource<List<Repo>>> = flow {
+    override fun getRepos(): Flow<Resource<List<Repo>>> = flow {
         try {
             emit(Resource.Loading())
             val localRepos = repository.getRepos()

@@ -6,7 +6,6 @@ import com.boukhari.orangebank.domain.Resource
 import com.boukhari.orangebank.domain.model.Repo
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -31,21 +30,23 @@ class GetRepoUseCaseImplTest {
     fun setUp() =
         MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
+
     @Test
-    fun test_getRepos_happy_flow_with_refresh() = runBlocking {
+    fun test_getRepos_happy_flow_with_local_data_empty() = runBlocking {
         //GIVEN
         val fakeRepo1 = Repo(1, "name", description = "description")
         val fakeRepo2 = fakeRepo1.copy(id = 2)
-        coEvery { repository.getRepos() } returns listOf(fakeRepo1, fakeRepo2)
+        coEvery { repository.getRepos() } returns emptyList() andThen listOf(fakeRepo1, fakeRepo2)
 
         //WHEN
         val collectedValues = mutableListOf<Resource<List<Repo>>>()
-        getRepoUseCase.getRepos(true).toList(collectedValues)
+        getRepoUseCase.getRepos().toList(collectedValues)
         val expectedData = listOf(fakeRepo1, fakeRepo2)
 
         //THEN
         //ensure downloadRepos is called before getRepos
         coVerifyOrder {
+            repository.getRepos()
             repository.downloadRepos()
             repository.getRepos()
         }
@@ -57,26 +58,37 @@ class GetRepoUseCaseImplTest {
     }
 
     @Test
-    fun test_getRepos_happy_flow() = runBlocking {
+    fun test_getRepos_happy_flow_with_existing_local_data() = runBlocking {
         //GIVEN
         val fakeRepo1 = Repo(1, "name", description = "description")
         val fakeRepo2 = fakeRepo1.copy(id = 2)
-        coEvery { repository.getRepos() } returns listOf(fakeRepo1, fakeRepo2)
+        val fakeRepo3 = fakeRepo1.copy(id = 3)
+        coEvery { repository.getRepos() } returns listOf(fakeRepo1, fakeRepo2) andThen listOf(
+            fakeRepo1,
+            fakeRepo2,
+            fakeRepo3
+        )
 
         //WHEN
         val collectedValues = mutableListOf<Resource<List<Repo>>>()
-        getRepoUseCase.getRepos(false).toList(collectedValues)
-        val expectedData = listOf(fakeRepo1, fakeRepo2)
+        getRepoUseCase.getRepos().toList(collectedValues)
+        val expectedOldData = listOf(fakeRepo1, fakeRepo2)
+        val expectedRefreshedData = listOf(fakeRepo1, fakeRepo2, fakeRepo3)
 
         //THEN
-        //verify that download is never called
-        coVerify(exactly = 0) { repository.downloadRepos() }
-        coVerify(exactly = 1) { repository.getRepos() }
+        coVerifyOrder {
+            repository.getRepos()
+            repository.downloadRepos()
+            repository.getRepos()
+        }
         //assert is Loading is emitted first
         assertTrue(collectedValues[0] is Resource.Loading)
-        //assert data is emitted with emptyList
+        //assert data is emitted the first time from db
         assertTrue(collectedValues[1] is Resource.Success)
-        assertEquals(collectedValues[1].data, expectedData)
+        assertEquals(collectedValues[1].data, expectedOldData)
+        //assert data is refreshed remotely then emitted the second time from db
+        assertTrue(collectedValues[2] is Resource.Success)
+        assertEquals(collectedValues[2].data, expectedRefreshedData)
     }
 
     @Test
