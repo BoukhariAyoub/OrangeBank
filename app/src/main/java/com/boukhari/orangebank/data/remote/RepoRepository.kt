@@ -21,17 +21,17 @@ class ApiRepositoryImpl(
     }
 
     override suspend fun getRepoById(id: Int): Repo? {
-        return localService.getById(id)?.toDomain() }
+        return localService.getById(id)?.toDomain()
+    }
 
     private fun RepoResponse.toDto() = RepoDto(
         id = id ?: throw IllegalStateException("Error while parsing : Missing field Id"),
         fullName = fullName
-            ?: throw IllegalStateException("Error while parsing : Missing field Name"),
+            ?: throw IllegalStateException("Error while parsing : Missing field Name for id:$id"),
         forks = forks ?: 0,
         openIssues = openIssues ?: 0,
         watchers = watchers ?: 0,
         description = description
-            ?: throw IllegalStateException("Error while parsing : Missing field Description")
     )
 
     private fun RepoDto.toDomain() = Repo(

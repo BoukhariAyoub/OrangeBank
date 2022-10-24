@@ -2,6 +2,7 @@ package com.boukhari.orangebank.domain
 
 import com.boukhari.orangebank.domain.model.Repo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
@@ -16,11 +17,14 @@ class GetRepoUseCaseImpl(private val repository: RepoRepository) : GetRepoUseCas
     override fun getRepos(shouldRefresh: Boolean): Flow<Resource<List<Repo>>> = flow {
         try {
             emit(Resource.Loading())
-            if (shouldRefresh) {
-                repository.downloadRepos()
+            val localRepos = repository.getRepos()
+            //first we send the local repos if not empty
+            if (localRepos.isNotEmpty()) {
+                emit(Resource.Success(localRepos))
             }
-            val repos = repository.getRepos()
-            emit(Resource.Success(repos))
+            //Then we refresh our database and emit the new results
+            repository.downloadRepos()
+            emit(Resource.Success(repository.getRepos()))
         } catch (e: HttpException) {
             emit(Resource.Error(e.localizedMessage ?: "An unexpected Http error"))
         } catch (e: IOException) {
@@ -28,7 +32,7 @@ class GetRepoUseCaseImpl(private val repository: RepoRepository) : GetRepoUseCas
         } catch (e: Throwable) {
             emit(Resource.Error(e.localizedMessage ?: "An unexpected error"))
         }
-    }
+    }.distinctUntilChanged()
 
     override fun getRepoById(id: Int): Flow<Resource<Repo>> = flow {
         val repo = repository.getRepoById(id)

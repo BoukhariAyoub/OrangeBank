@@ -6,5 +6,5 @@ data class Repo(
      val forks : Int = 0,
      val openIssues : Int = 0,
      val watchers : Int = 0,
-     val description : String
+     val description : String? = null
 )

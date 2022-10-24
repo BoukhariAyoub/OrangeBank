@@ -71,7 +71,7 @@ data class RepoResponse(
     @SerializedName("archived") var archived: Boolean? = null,
     @SerializedName("disabled") var disabled: Boolean? = null,
     @SerializedName("open_issues_count") var openIssuesCount: Int? = null,
-    @SerializedName("license") var license: String? = null,
+    @SerializedName("license") var license: LicenseResponse? = null,
     @SerializedName("allow_forking") var allowForking: Boolean? = null,
     @SerializedName("is_template") var isTemplate: Boolean? = null,
     @SerializedName("web_commit_signoff_required") var webCommitSignoffRequired: Boolean? = null,

@@ -9,5 +9,5 @@ data class RepoDto(
     @ColumnInfo(name = "forks") val forks: Int = 0,
     @ColumnInfo(name = "openIssues") val openIssues: Int = 0,
     @ColumnInfo(name = "watchers") val watchers: Int = 0,
-    @ColumnInfo(name = "description") val description: String
+    @ColumnInfo(name = "description") val description: String? = null
 )
